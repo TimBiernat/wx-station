@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <!-- avoid favicon requests -->
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Wx Station</title>
+    <script type="text/javascript">
+        "use strict";
+
+        function updateValues() {
+            getValues();
+            setInterval(() => {
+                getValues();
+                console.log(".");
+            }, 60 * 1000);
+        }
+
+        function getValues() {
+            fetch("/api/v1/temperature/1", { method: "get" })
+                .then(response => response.json())
+                .then(jsonData => document.getElementById("temperature").text = jsonData[0].temperature + "°")
+                .catch(err => {
+                    console.log(err);
+                });
+                fetch("/api/v1/pressure/1", { method: "get" })
+                .then(response => response.json())
+                .then(jsonData => document.getElementById("pressure").text = jsonData[0].pressure)
+                .catch(err => {
+                    console.log(err);
+                });
+                fetch("/api/v1/humidity/1", { method: "get" })
+                .then(response => response.json())
+                .then(jsonData => {
+                    document.getElementById("humidity").text = jsonData[0].humidity + "%";
+                    let ts = new Date(jsonData[0].time);
+                    document.getElementById("timestamp").innerText = ts.getMonth()+1 + "/" + ts.getDate() 
+                        + "  " + ts.getHours() + ":" + ts.getMinutes();
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+
+    </script>
+
+</head>
+
+<body style="background-color:black; font-family: 'Lucida Sans', sans-serif;" onload="updateValues();">
+
+    <div class="container-fluid" style="padding: 100px; margin: auto;">
+        <div class="row">
+            <div class="col-lg-3" style="font-size: 8vw; font-weight: bold;">
+                <a id="temperature" style="color: white; text-decoration: none;" href=""></a>
+            </div>
+            <div class="col-lg-5" style="font-size: 8vw; font-weight: bold;">
+                <a id="pressure" style="color: white; text-decoration: none;" href=""></a>
+            </div>>
+            <div class="col-lg-3" style="font-size: 8vw; font-weight: bold;">
+                <a id="humidity" style="color: white; text-decoration: none;" href=""></a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg" id="timestamp" style="font-size: 2vw; color: white;">
+            </div>
+        </div>
+    </div>
+    </div>
+
+</body>
+
+</html>
