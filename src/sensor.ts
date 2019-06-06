@@ -4,6 +4,7 @@ import { Client } from "pg";
 
 let bme280: any;
 let db: Client;
+const Bme280 = require('@agilatech/bme280');
 
 export async function init() {
     let elevation = 0;
@@ -13,7 +14,6 @@ export async function init() {
         elevation = result.rows[0].elevation;
     }
     try {
-        const Bme280 = require('@agilatech/bme280');
         bme280 = new Bme280({ elevation: elevation });
         log("info", "bme280 sensor initialized");
     } catch(err) {
@@ -27,7 +27,12 @@ export async function init() {
 }
 
 function getData(): void {
-    if (bme280 && bme280.isActive()) {
+    // if (bme280 && bme280.isActive()) {
+    if (bme280) {
+        log("info", "name: %s", bme280.deviceName());
+        log("info", "type: %s", bme280.deviceType());
+        log("info", "version: %s", bme280.deviceVersion());
+
         bme280.getDataFromDevice((err: any) => {
             if (!err) {
                 const pressure    = bme280.device.parameters[0].value;
