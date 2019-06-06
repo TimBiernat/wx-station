@@ -27,14 +27,16 @@ function getData(): number[] {
 }
 
 function storeData(data: number[]) {
-    const text = "insert into measurement (time, temperature, pressure, humidity, location_fk) values (CURRENT_TIMESTAMP, $1, $2, $3, $4)";
-    const values = [cToF(data[0]), data[1], data[2], process.env.LOCATION];
-    db.query(text, values, (err) => {
-        if (err) {
-            log("warn", "error inserting sensor data: %s", err);
-        }
-    });
+    if (!isNaN(data[0])) {
+        const text = "insert into measurement (time, temperature, pressure, humidity, location_fk) values (CURRENT_TIMESTAMP, $1, $2, $3, $4)";
+        const values = [cToF(data[0]), data[1], data[2], process.env.LOCATION];
+        db.query(text, values, (err) => {
+            if (err) {
+                log("warn", "error inserting sensor data: %s", err);
+            }
+        });
+    }
 }
-function cToF(c: number) : number {
+function cToF(c: number): number {
     return (c * 9 / 5) + 32;
 }

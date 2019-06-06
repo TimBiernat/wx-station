@@ -1,0 +1,28 @@
+Target Hardware
+  Raspberry Pi Zero W
+  BME 280 (temperature, pressure, humidity)
+
+Server
+  Apache Server (reverse proxy 80 --> 8080)
+  Postgres DB
+    location
+    measurement
+  Dockerized Node/TypeScript app
+    embedded Express server hosts API/UI
+  Python bme280.py script in cronjob (every minute)
+    writes sensor data to /tmp/sensor
+
+UI
+  Bootstrap styles
+  Fetch XHR 
+    get data from API every minute
+
+Docker Container
+  docker build -t wx-station .
+  docker run --restart=always -d \
+    --env DB_HOST='<ip addr>' \
+    --env DB_USER=user \
+    --env DB_DATABASE=db \
+    --env DB_PASSWORD=pass \
+    --mount type=bind,source=/tmp,target=/tmp \
+    -p 8080:8080 wx-station npm run server
