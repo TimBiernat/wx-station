@@ -1,6 +1,6 @@
 Target Hardware
   Raspberry Pi Zero W
-  BME 280 (temperature, pressure, humidity)
+  BME280 sensor (temperature, pressure, humidity)
 
 Server
   Apache Server (reverse proxy 80 --> 8080)
@@ -8,7 +8,7 @@ Server
     location
     measurement
   Dockerized Node/TypeScript app
-    embedded Express server hosts API/UI
+    embedded Express server hosts API/UI on port 8080
   Python bme280.py script in cronjob (every minute)
     writes sensor data to /tmp/sensor
 

@@ -14,6 +14,18 @@
     <script type="text/javascript">
         "use strict";
 
+        const up = "↑";
+        const down = "↓";
+        let lastTemp, lastPress, lastHumid = 0;
+
+        Number.prototype.pad = function (size) {
+            var s = String(this);
+            while (s.length < (size || 2)) { s = "0" + s; }
+            return s;
+        }
+
+        getLocation();
+
         function updateValues() {
             getValues();
             setInterval(() => {
@@ -22,26 +34,54 @@
             }, 60 * 1000);
         }
 
+        function getLocation() {
+            fetch("/api/v1/location/1", { method: "get" })
+                .then(response => response.json())
+                .then(jsonData => {
+                    document.getElementById("location").innerText =  jsonData[0].description;
+                    lastTemp = jsonData[0].temperature;
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+
         function getValues() {
             fetch("/api/v1/temperature/1", { method: "get" })
                 .then(response => response.json())
-                .then(jsonData => document.getElementById("temperature").text = jsonData[0].temperature + "°")
+                .then(jsonData => {
+                    let indicator = "";
+                    if (lastTemp < jsonData[0].temperature) indicator = up;
+                    if (lastTemp > jsonData[0].temperature) indicator = down;
+                    document.getElementById("temperature").text =  jsonData[0].temperature + "°" + indicator;
+                    lastTemp = jsonData[0].temperature;
+                })
                 .catch(err => {
                     console.log(err);
                 });
-                fetch("/api/v1/pressure/1", { method: "get" })
-                .then(response => response.json())
-                .then(jsonData => document.getElementById("pressure").text = jsonData[0].pressure)
-                .catch(err => {
-                    console.log(err);
-                });
-                fetch("/api/v1/humidity/1", { method: "get" })
+            fetch("/api/v1/pressure/1", { method: "get" })
                 .then(response => response.json())
                 .then(jsonData => {
-                    document.getElementById("humidity").text = jsonData[0].humidity + "%";
+                    let indicator = "";
+                    if (lastPress < jsonData[0].pressure) indicator = up;
+                    if (lastPress > jsonData[0].pressure) indicator = down;
+                    document.getElementById("pressure").text = jsonData[0].pressure + indicator;
+                    lastPress = jsonData[0].pressure;
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+            fetch("/api/v1/humidity/1", { method: "get" })
+                .then(response => response.json())
+                .then(jsonData => {
+                    let indicator = "";
+                    if (lastHumid < jsonData[0].humidity) indicator = up;
+                    if (lastHumid > jsonData[0].humidity) indicator = down;
+                    document.getElementById("humidity").text = jsonData[0].humidity + "%" + indicator;
                     let ts = new Date(jsonData[0].time);
-                    document.getElementById("timestamp").innerText = ts.getMonth()+1 + "/" + ts.getDate() 
-                        + "  " + ts.getHours() + ":" + ts.getMinutes();
+                    document.getElementById("timestamp").innerText = ts.getMonth() + 1 + "/" + ts.getDate()
+                        + "  " + ts.getHours() + ":" + ts.getMinutes().pad();
+                    lastHumid = jsonData[0].humidity;
                 })
                 .catch(err => {
                     console.log(err);
@@ -66,9 +106,10 @@
                 <a id="humidity" style="color: white; text-decoration: none;" href=""></a>
             </div>
         </div>
-
         <div class="row">
-            <div class="col-lg" id="timestamp" style="font-size: 3vw; color: white;">
+            <div class="col-lg-4" id="timestamp" style="font-size: 3vw; color: white;">
+            </div>
+            <div class="col-lg-6" id="location" style="font-size: 3vw; color: white;">
             </div>
         </div>
     </div>

@@ -2,6 +2,14 @@ import { Request, Response } from "express";
 import * as db from "./db";
 import { log } from "winston";
 
+export async function location(req: Request, res: Response, locationParam: string) {
+    const locationId = req.params[locationParam];
+    const client = db.getClient();
+    const result = await client.query("select description from location where id=" + locationId);
+    log("info", "location: " + JSON.stringify(result.rows[0].description));
+    res.json(result.rows);
+}
+
 export async function get(req: Request, res: Response, valueParam: string, locationParam: string) {
     const locationId = req.params[locationParam];
     const value = req.params[valueParam];

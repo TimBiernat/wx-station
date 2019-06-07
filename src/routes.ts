@@ -4,6 +4,9 @@ import * as controller from "./controller";
 
 const router = Router();
 
+// location/1
+router.get("/location/:locationId", (req, res) => controller.location(req, res, "locationId"));
+
 // temperature/1
 router.get("/:value/:locationId", (req, res) => controller.get(req, res, "value", "locationId"));
 
