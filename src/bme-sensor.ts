@@ -4,7 +4,7 @@ import { Client } from "pg";
 
 let bme280: any;
 let db: Client;
-
+// this module currently not used, issue with @agilatech/bme280 library
 export async function init() {
     let elevation = 0;
     db = DB.getClient();

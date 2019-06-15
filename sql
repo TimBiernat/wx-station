@@ -36,6 +36,6 @@ COMMENT ON COLUMN public.measurement.humidity
     IS '% relative';
 
 COMMENT ON COLUMN public.measurement.pressure
-    IS 'atmospheric mbar (hPa)';
+    IS 'atmospheric mbar (hPa) sea level';
 
 insert into location (latitude, longitude, elevation, description) values (<lat>, <long>, <elev m>, '<descr');

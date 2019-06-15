@@ -10,7 +10,7 @@ async function run() {
         await config.logger();
         await db.connect();
         await db.init();
-        await sensor.init();
+        await sensor.init(28);  // compensate for ~800 ft MSL
         const app = expserver();
         await config.express(app);
         app.listen(getPort(), () => {
