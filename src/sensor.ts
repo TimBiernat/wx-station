@@ -4,10 +4,14 @@ import * as DB from "./db";
 import { Client } from "pg";
 
 let db: Client;
-let pCorrection : number;
+let tCorrection: number = 0;
+let pCorrection: number = 0;
+let hCorrection: number = 0;
 
-export async function init(pressureCorrection: number) {
-    this.pCorrection = pressureCorrection;
+export async function init(tCorr: number, pCorr: number, hCorr: number) {
+    tCorrection = tCorr;
+    pCorrection = pCorr;
+    hCorrection = hCorr;
     db = DB.getClient();
     let data = getData();
     storeData(data);
@@ -31,7 +35,7 @@ function getData(): number[] {
 function storeData(data: number[]) {
     if (!isNaN(data[0])) {
         const text = "insert into measurement (time, temperature, pressure, humidity, location_fk) values (CURRENT_TIMESTAMP, $1, $2, $3, $4)";
-        const values = [cToF(data[0]), data[1] + pCorrection, data[2], process.env.LOCATION];
+        const values = [cToF(data[0]) + tCorrection, data[1] + pCorrection, data[2] + hCorrection, process.env.LOCATION];
         db.query(text, values, (err) => {
             if (err) {
                 log("warn", "error inserting sensor data: %s", err);

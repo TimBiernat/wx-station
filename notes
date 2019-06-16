@@ -3,7 +3,7 @@ Target Hardware
   BME280 sensor (temperature, pressure, humidity)
 
 Server
-  Apache Server (reverse proxy 80 --> 8080)
+  Apache Server (redirect port 80 to 443, reverse proxy 443 --> 8080)
   Postgres DB
     location
     measurement
@@ -19,10 +19,12 @@ UI
 
 Docker Container
   docker build -t wx-station .
+  (tag/push/pull)
   docker run --restart=always -d \
-    --env DB_HOST='<ip addr>' \
+    --network=host \
     --env DB_USER=user \
     --env DB_DATABASE=db \
     --env DB_PASSWORD=pass \
     --mount type=bind,source=/tmp,target=/tmp \
     -p 8080:8080 wx-station npm run server
+
