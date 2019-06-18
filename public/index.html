@@ -11,11 +11,18 @@
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
     <title>Wx Station</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     <script type="text/javascript">
         "use strict";
 
+        google.charts.load("current", { packages: ["corechart", "line"] });
+        google.charts.setOnLoadCallback(initCharts);
+        let trendChart;
+
         const up = "↑";
         const down = "↓";
+        const locationId = 1;
         let lastTemp, lastPress, lastHumid = 0;
 
         Number.prototype.pad = function (size) {
@@ -24,7 +31,11 @@
             return s;
         }
 
-        getLocation();
+        getLocation(locationId);
+
+        function initCharts() {
+            trendChart = new google.visualization.LineChart(document.getElementById("trend_chart"));
+        }
 
         function updateValues() {
             getValues();
@@ -34,11 +45,11 @@
             }, 60 * 1000);
         }
 
-        function getLocation() {
-            fetch("/api/v1/location/1", { method: "get" })
+        function getLocation(id) {
+            fetch("/api/v1/location/" + locationId, { method: "get" })
                 .then(response => response.json())
                 .then(jsonData => {
-                    document.getElementById("location").innerText =  jsonData[0].description;
+                    document.getElementById("location").innerText = jsonData[0].description;
                     lastTemp = jsonData[0].temperature;
                 })
                 .catch(err => {
@@ -47,37 +58,37 @@
         }
 
         function getValues() {
-            fetch("/api/v1/temperature/1", { method: "get" })
+            fetch("/api/v1/temperature/" + locationId, { method: "get" })
                 .then(response => response.json())
                 .then(jsonData => {
                     let indicator = "";
                     if (lastTemp < jsonData[0].temperature) indicator = up;
                     if (lastTemp > jsonData[0].temperature) indicator = down;
-                    document.getElementById("temperature").text =  jsonData[0].temperature + "°" + indicator;
+                    document.getElementById("temperature").innerHTML = jsonData[0].temperature + "°" + indicator;
                     lastTemp = jsonData[0].temperature;
                 })
                 .catch(err => {
                     console.log(err);
                 });
-            fetch("/api/v1/pressure/1", { method: "get" })
+            fetch("/api/v1/pressure/" + locationId, { method: "get" })
                 .then(response => response.json())
                 .then(jsonData => {
                     let indicator = "";
                     if (lastPress < jsonData[0].pressure) indicator = up;
                     if (lastPress > jsonData[0].pressure) indicator = down;
-                    document.getElementById("pressure").text = jsonData[0].pressure + indicator;
+                    document.getElementById("pressure").innerHTML = jsonData[0].pressure + indicator;
                     lastPress = jsonData[0].pressure;
                 })
                 .catch(err => {
                     console.log(err);
                 });
-            fetch("/api/v1/humidity/1", { method: "get" })
+            fetch("/api/v1/humidity/" + locationId, { method: "get" })
                 .then(response => response.json())
                 .then(jsonData => {
                     let indicator = "";
                     if (lastHumid < jsonData[0].humidity) indicator = up;
                     if (lastHumid > jsonData[0].humidity) indicator = down;
-                    document.getElementById("humidity").text = jsonData[0].humidity + "%" + indicator;
+                    document.getElementById("humidity").innerHTML = jsonData[0].humidity + "%" + indicator;
                     let ts = new Date(jsonData[0].time);
                     document.getElementById("timestamp").innerText = ts.getMonth() + 1 + "/" + ts.getDate()
                         + "  " + ts.getHours() + ":" + ts.getMinutes().pad();
@@ -86,6 +97,46 @@
                 .catch(err => {
                     console.log(err);
                 });
+        }
+
+        function drawTrend(value) {
+            // defaults to last 24 hrs
+            let now = new Date();
+            let start = new Date();
+            start.setDate(now.getDate() - 1);
+            start = start.toISOString();
+            let end = now.toISOString();
+            fetch("/api/v1/" + value + "/" + locationId + "/" + start + "/" + end, { method: "get" })
+                .then(response => response.json())
+                .then(jsonData => {
+                    var options = {
+                        height: 400,
+                        legend: { position: 'none' },
+                        hAxis: {
+                            format: "HH:mm",
+                        },
+                        vAxis: {
+                            title: value,
+                        },
+                    };
+                    let data = formatJsonData(jsonData);
+                    let trendData = new google.visualization.DataTable();
+                    trendData.addColumn("date", "");
+                    trendData.addColumn("number", "");
+                    trendData.addRows(data);
+                    trendChart.draw(trendData, options);
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+
+        function formatJsonData(data) {
+            for (const obj of data) {
+                obj[0] = new Date(obj[0]);
+                obj[1] = Number(obj[1]);
+            }
+            return data;
         }
 
     </script>
@@ -97,13 +148,13 @@
     <div class="container-fluid" style="padding: 50px; margin: auto;">
         <div class="row">
             <div class="col-lg-3" style="font-size: 8vw; font-weight: bold;">
-                <a id="temperature" style="color: white; text-decoration: none;" href=""></a>
+                <span id="temperature" style="color: white;" onclick="drawTrend(this.id)"></span>
             </div>
             <div class="col-lg-5" style="font-size: 8vw; font-weight: bold;">
-                <a id="pressure" style="color: white; text-decoration: none;" href=""></a>
+                <span id="pressure" style="color: white;" onclick="drawTrend(this.id)"></span>
             </div>>
             <div class="col-lg-2" style="font-size: 8vw; font-weight: bold;">
-                <a id="humidity" style="color: white; text-decoration: none;" href=""></a>
+                <span id="humidity" style="color: white;" onclick="drawTrend(this.id)"></span>
             </div>
         </div>
         <div class="row">
@@ -112,7 +163,10 @@
             <div class="col-lg-6" id="location" style="font-size: 3vw; color: white;">
             </div>
         </div>
-    </div>
+        <p></p>
+        <div class="row">
+            <div class="col-lg-12" id="trend_chart"></div>
+        </div>
     </div>
 
 </body>

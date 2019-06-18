@@ -25,7 +25,11 @@ export async function query(req: Request, res: Response, valueParam: string, loc
     const startDate = req.params[start];
     const endDate = req.params[end];
     const client = db.getClient();
-    const result = await client.query("select time," + value + " from measurement where location_fk="
-        + locationId + " and time between symmetric '" + startDate + "' and '" + endDate + "'");
+    const query = {
+        text: "select time," + value + " from measurement where location_fk=$1 and time between symmetric $2 and $3",
+        values: [locationId, startDate, endDate],
+        rowMode: "array",
+    }
+    const result = await client.query(query);
     res.json(result.rows);
 }
