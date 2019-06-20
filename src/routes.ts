@@ -13,4 +13,7 @@ router.get("/:value/:locationId", (req, res) => controller.get(req, res, "value"
 // temperature/1/2019-6-1/2019-6-2
 router.get("/:value/:locationId/:start/:end", (req, res) => controller.query(req, res, "value", "locationId", "start", "end"));
 
+//1/2019-6-1/2019-6-2
+router.get("/:locationId/:start/:end", (req, res) => controller.queryAll(req, res, "locationId", "start", "end"));
+
 export default router;

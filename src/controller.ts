@@ -33,3 +33,17 @@ export async function query(req: Request, res: Response, valueParam: string, loc
     const result = await client.query(query);
     res.json(result.rows);
 }
+
+export async function queryAll(req: Request, res: Response, locationParam: string, start: string, end: string) {
+    const locationId = req.params[locationParam];
+    const startDate = req.params[start];
+    const endDate = req.params[end];
+    const client = db.getClient();
+    const query = {
+        text: "select time, temperature, pressure, humidity from measurement where location_fk=$1 and time between symmetric $2 and $3",
+        values: [locationId, startDate, endDate],
+        rowMode: "array",
+    }
+    const result = await client.query(query);
+    res.json(result.rows);
+}

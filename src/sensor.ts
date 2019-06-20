@@ -17,18 +17,27 @@ export async function init(tCorr: number, pCorr: number, hCorr: number) {
     storeData(data);
     setInterval(() => {
         data = getData();
-        storeData(data);
+        if (data && data.length > 0) storeData(data);
     }, 60 * 1000);
 }
 
 // cronjob runs bme280.py script every min, writes sensor data to file
 function getData(): number[] {
-    let data: number[] = [3];
-    let line = fs.readFileSync("/tmp/sensor", "utf8");
-    let result = line.split(" ");
-    data[0] = parseFloat(result[0]);
-    data[1] = parseFloat(result[1]);
-    data[2] = parseFloat(result[2]);
+    let data: number[] = [];
+    let line: string;
+    try {
+        line = fs.readFileSync("/tmp/sensor", "utf8");
+    } catch(err) {
+        log("warn", "Sensor data file not available");
+    }
+    if (line && line.length > 10) {
+        let result = line.split(" ");
+        data[0] = parseFloat(result[0]);
+        data[1] = parseFloat(result[1]);
+        data[2] = parseFloat(result[2]);
+    } else {
+        log("warn", "Sensor data not available");
+    }
     return data;
 }
 
@@ -41,6 +50,8 @@ function storeData(data: number[]) {
                 log("warn", "error inserting sensor data: %s", err);
             }
         });
+    } else {
+        log("warn", "Sensor data not available");
     }
 }
 function cToF(c: number): number {

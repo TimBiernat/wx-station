@@ -39,8 +39,10 @@
 
         function updateValues() {
             getValues();
+            drawTrend();
             setInterval(() => {
                 getValues();
+                drawTrend();
                 console.log(".");
             }, 60 * 1000);
         }
@@ -99,30 +101,39 @@
                 });
         }
 
-        function drawTrend(value) {
+        function drawTrend() {
             // defaults to last 24 hrs
             let now = new Date();
             let start = new Date();
             start.setDate(now.getDate() - 1);
             start = start.toISOString();
             let end = now.toISOString();
-            fetch("/api/v1/" + value + "/" + locationId + "/" + start + "/" + end, { method: "get" })
+            fetch("/api/v1/" + locationId + "/" + start + "/" + end, { method: "get" })
                 .then(response => response.json())
                 .then(jsonData => {
                     var options = {
                         height: 400,
-                        legend: { position: 'none' },
                         hAxis: {
                             format: "HH:mm",
                         },
-                        vAxis: {
-                            title: value,
+                        series: {
+                            0: { targetAxisIndex: 0 },
+                            1: { targetAxisIndex: 1 },
+                            2: { targetAxisIndex: 0 },
                         },
+                        vAxes: {
+                            0: { title: "temp, humidity" },
+                            1: { title: "pressure" }
+                        },
+                        lineWidth: 2,
+                        colors: ["red", "black", "blue"]
                     };
                     let data = formatJsonData(jsonData);
                     let trendData = new google.visualization.DataTable();
-                    trendData.addColumn("date", "");
-                    trendData.addColumn("number", "");
+                    trendData.addColumn("date", "time");
+                    trendData.addColumn("number", "temperature");
+                    trendData.addColumn("number", "pressure");
+                    trendData.addColumn("number", "humidity");
                     trendData.addRows(data);
                     trendChart.draw(trendData, options);
                 })
@@ -135,6 +146,8 @@
             for (const obj of data) {
                 obj[0] = new Date(obj[0]);
                 obj[1] = Number(obj[1]);
+                obj[2] = Number(obj[2]);
+                obj[3] = Number(obj[3]);
             }
             return data;
         }
@@ -148,13 +161,13 @@
     <div class="container-fluid" style="padding: 50px; margin: auto;">
         <div class="row">
             <div class="col-lg-3" style="font-size: 8vw; font-weight: bold;">
-                <span id="temperature" style="color: white;" onclick="drawTrend(this.id)"></span>
+                <span id="temperature" style="color: white;" onclick="drawTrend()"></span>
             </div>
             <div class="col-lg-5" style="font-size: 8vw; font-weight: bold;">
-                <span id="pressure" style="color: white;" onclick="drawTrend(this.id)"></span>
+                <span id="pressure" style="color: white;" onclick="drawTrend()"></span>
             </div>>
             <div class="col-lg-2" style="font-size: 8vw; font-weight: bold;">
-                <span id="humidity" style="color: white;" onclick="drawTrend(this.id)"></span>
+                <span id="humidity" style="color: white;" onclick="drawTrend()"></span>
             </div>
         </div>
         <div class="row">
