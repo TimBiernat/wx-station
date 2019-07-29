@@ -171,7 +171,7 @@ def main():
 #  print "Pressure : ", pressure, "hPa"
 #  print "Humidity : ", humidity, "%"
 
-  print temperature, pressure, humidity
+  print (temperature, pressure, humidity)
 
 if __name__=="__main__":
    main()

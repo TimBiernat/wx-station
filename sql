@@ -17,7 +17,7 @@ CREATE TABLE public.measurement
 (
     id bigserial,
     "time" timestamp without time zone NOT NULL,
-    temperature numeric(3,1),
+    temperature numeric(4,1),
     humidity numeric(3,0),
     pressure numeric(6,2),
     location_fk bigint NOT NULL,
@@ -37,5 +37,8 @@ COMMENT ON COLUMN public.measurement.humidity
 
 COMMENT ON COLUMN public.measurement.pressure
     IS 'atmospheric mbar (hPa) sea level';
+
+
+
 
 insert into location (latitude, longitude, elevation, description) values (<lat>, <long>, <elev m>, '<descr');

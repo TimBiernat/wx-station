@@ -1,0 +1,17 @@
+[Unit]
+Description=Wx Station
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/node /home/tim/wx-station/dist/server.js
+Restart=always
+User=nobody
+Group=nogroup
+Environment=NODE_ENV=production
+Environment=DB_USER=tim
+Environment=DB_DATABASE=wx
+Environment=DB_PASSWORD=password
+WorkingDirectory=/home/tim/wx-station
+
+[Install]
+WantedBy=multi-user.target
