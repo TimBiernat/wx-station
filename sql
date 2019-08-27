@@ -18,8 +18,8 @@ CREATE TABLE public.measurement
     id bigserial,
     "time" timestamp without time zone NOT NULL,
     temperature numeric(4,1),
-    humidity numeric(3,0),
-    pressure numeric(6,2),
+    humidity numeric(3,1),
+    pressure numeric(5,1),
     location_fk bigint NOT NULL,
     CONSTRAINT "MEASUREMENT_pkey" PRIMARY KEY (id),
     CONSTRAINT location FOREIGN KEY (location_fk)
