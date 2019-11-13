@@ -40,7 +40,7 @@ export async function queryAll(req: Request, res: Response, locationParam: strin
     const endDate = req.params[end];
     const client = db.getClient();
     const query = {
-        text: "select time, temperature, pressure, humidity from measurement where location_fk=$1 and time between symmetric $2 and $3",
+        text: "select time, temperature, pressure, humidity from measurement where location_fk=$1 and time between symmetric $2 and $3 order by time asc",
         values: [locationId, startDate, endDate],
         rowMode: "array",
     }
