@@ -5,8 +5,9 @@
     "rulesDirectory": [],
     "rules": {
         "interface-name": false,
+        "max-line-length": false,
         "member-access": false,
-        "no-unused-expression": false,
+        "no-unused-expression": false
     },
     "jsRules": {}
 }
